@@ -10,7 +10,7 @@ Tests for `nova_api_docs_tracker` module.
 
 import unittest
 
-from nova_api_docs_tracker import nova_api_docs_tracker
+from nova_api_docs_tracker import main
 
 
 class TestNova_api_docs_tracker(unittest.TestCase):
