@@ -3,8 +3,10 @@
 import glob
 import os
 import re
+from nova_api_docs_tracker.templates import templates
 
 SPLIT_FILE_RE = re.compile(r'\n([\w\s]+)\n\=+\n', re.MULTILINE)
+METHODS_LIST_RE = re.compile(r'rest_method:: ([A-Z]+.*$)', re.MULTILINE)
 
 def main():
     # TODO(auggy): args: inc files path
@@ -14,38 +16,47 @@ def main():
     # get inc files
     inc_files = get_inc_files(path)
 
+    body_template = templates['body']
+    method_template = templates['methods']
+    parameters_template = templates['parameters']
+    examples_template = templates['examples']
+
     for filename in inc_files:
+        output['inc_file'] = filename
+
         contents = inc_files[filename]
-        # TODO(auggy): link to file on github??
+        # TODO(auggy): link to inc source code in repo, cgit or github
+        output['source_link'] = ''
 
         # TODO(auggy): this should use docutils
         extracted_contents = extract_stuff(split_inc_file(contents))
 
         # verify body
-        output['body'] = extracted_contents['body']
+        rendered_body = body_template.render(output)
+
+        # TODO(auggy): print to local file then post to Launchpad
+        print rendered_body
+
 
         # verify methods names
-        output['methods_list'] = '\n'.join(extracted_contents['methods'].keys())
+        output['methods_list'] = get_methods_list(extracted_contents['methods'])
+        rendered_methods = method_template.render(output)
 
-        methods = {}
+        # TODO(auggy): print to local file then post to Launchpad
+        print rendered_methods
+
         for method_name in extracted_contents['methods']:
             method_content = extracted_contents['methods'][method_name]
 
             # verify parameters
-            # TODO(auggy): create parameters list
+            output['method_name'] = method_name
+            output['parameters_list'] = get_parameters_list(method_content)
+            rendered_parameters = parameters_template.render(output)
+            print rendered_parameters
 
             # verify examples
-            # TODO(auggy): I don't think we need anything special here...
-
-            methods[method_name] = method_content
-
-        output['methods'] = methods
-
-        # TODO(auggy): print to local file using Jinja templates
-        print "Body: %(body)s \n " + \
-              "Method List: %(methods_list)s \n" + \
-              "Methods: %(methods)s" \
-              % output
+            rendered_examples = examples_template.render(output)
+            print rendered_examples
 
         # TODO(auggy): post bugs to Launchpad using local files
         # TODO(auggy): keep track of bugs...?
@@ -58,6 +69,7 @@ def get_inc_files(path):
     for filename in glob.glob(os.path.join(path, '*.inc')):
         print "Processing %(filename)s..." % {'filename': filename}
         f = open(filename, 'r')
+
         # TODO(auggy): remove rest of path from filename
         inc_files[filename] = f.read()
 
@@ -73,8 +85,24 @@ def extract_stuff(split_contents):
     result = dict()
 
     result['body'] = split_contents[0]
-    result['methods'] = dict(zip(map(lambda x: re.sub('\\n', '', x), split_contents[3::2]), split_contents[2::2]))
+    result['methods'] = dict(zip(map(lambda x: re.sub('\\n', '', x), split_contents[1::2]), split_contents[2::2]))
     return result
+
+def get_methods_list(contents):
+    list = ''
+    for k in contents:
+        v = contents[k]
+        found = re.search(METHODS_LIST_RE, v)
+        if found:
+            url = found.group(1)
+        else:
+            continue
+        list = list + url + ' (' + k + ')\n'
+    return list
+
+
+def get_parameters_list(contents):
+    return []
 
 # Allow for local debugging
 if __name__ == '__main__':
