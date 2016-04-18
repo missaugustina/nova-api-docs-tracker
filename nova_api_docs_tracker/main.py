@@ -41,11 +41,16 @@ def main():
 
         output['methods'] = methods
 
-        # TODO(auggy): use Jinja templates
+        # TODO(auggy): print to local file using Jinja templates
         print "Body: %(body)s \n " + \
               "Method List: %(methods_list)s \n" + \
               "Methods: %(methods)s" \
               % output
+
+        # TODO(auggy): post bugs to Launchpad using local files
+        # TODO(auggy): keep track of bugs...?
+
+        # TODO(auggy): option for retrieving and editing LP bugs...
 
 
 def get_inc_files(path):
