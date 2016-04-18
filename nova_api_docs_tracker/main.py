@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 import glob
 import os
 import re
+
 from nova_api_docs_tracker.templates import templates
 
 SPLIT_FILE_RE = re.compile(r'\n([\w\s]+)\n\=+\n', re.MULTILINE)
 METHODS_LIST_RE = re.compile(r'rest_method:: ([A-Z]+.*$)', re.MULTILINE)
 
 def main():
-    # TODO(auggy): args: inc files path
-    path = ''
+    args = parse_args()
+    path = args.path
     output = {}
 
     # get inc files
@@ -34,7 +36,7 @@ def main():
         # verify body
         rendered_body = body_template.render(output)
 
-        # TODO(auggy): print to local file then post to Launchpad
+        # TODO(auggy): print to local file
         print rendered_body
 
 
@@ -42,7 +44,7 @@ def main():
         output['methods_list'] = get_methods_list(extracted_contents['methods'])
         rendered_methods = method_template.render(output)
 
-        # TODO(auggy): print to local file then post to Launchpad
+        # TODO(auggy): print to local file
         print rendered_methods
 
         for method_name in extracted_contents['methods']:
@@ -52,16 +54,28 @@ def main():
             output['method_name'] = method_name
             output['parameters_list'] = get_parameters_list(method_content)
             rendered_parameters = parameters_template.render(output)
+
+            # TODO(auggy): print to local file
             print rendered_parameters
 
             # verify examples
             rendered_examples = examples_template.render(output)
+
+            # TODO(auggy): print to local file
             print rendered_examples
 
         # TODO(auggy): post bugs to Launchpad using local files
         # TODO(auggy): keep track of bugs...?
 
         # TODO(auggy): option for retrieving and editing LP bugs...
+
+def parse_args():
+    parser = argparse.ArgumentParser("Post bugs to Launchpad for verifying API docs")
+    parser.add_argument("path",
+                        type=str,
+                        help="inc files location",
+                        nargs="?")
+    return parser.parse_args()
 
 
 def get_inc_files(path):
@@ -102,6 +116,7 @@ def get_methods_list(contents):
 
 
 def get_parameters_list(contents):
+    # TODO(auggy): if we decide this is helpful
     return []
 
 # Allow for local debugging
