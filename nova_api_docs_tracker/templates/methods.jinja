@@ -1,9 +1,22 @@
+Verify method list for {{inc_file}}
 
-Verify methods
-Do all methods of the resource currently exist?
-Rearange methods in order (sorted by url)
+{{github_link}}
+
+1. Do all methods for the resource currently exist?
+
+Methods currently documented:
+{{methods_list}}
+
+2. Rearrange methods in the following order (sorted by url):
 GET
 POST
 PUT
 DELETE
-i.e. for servers.inc GET /servers, POST /servers, GET /servers/details, GET /servers/{id}, PUT /servers/{id}, DELETE /servers/{id}
+
+For example, servers.inc would be:
+GET /servers
+POST /servers
+GET /servers/details
+GET /servers/{id}
+PUT /servers/{id}
+DELETE /servers/{id}

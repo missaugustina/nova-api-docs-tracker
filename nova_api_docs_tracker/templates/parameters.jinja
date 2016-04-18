@@ -1,6 +1,12 @@
-Verify all parameters
-Are all parameters that exist in the resource are listed
-Are all parameters referencing the right lookup value in parameters.yaml
+Verify all parameters for {{method_name}} in {{inc_file}}
+
+{{github_link}}
+
+1. Are all parameters that exist in the resource listed?
+{{parameter_list}}
+
+2. Are all parameters referencing the right lookup value in parameters.yaml?
 name, id are common issues, will need $foo_name and $foo_id created
-Add microversion parameters at the end of the table in order of introduction
+
+3. Add microversion parameters at the end of the table in order of introduction
 min_ver: 2.10 is a valid parameter key
