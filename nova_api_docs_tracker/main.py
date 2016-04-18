@@ -26,9 +26,11 @@ def main():
     for filename in inc_files:
         output['inc_file'] = filename
 
-        contents = inc_files[filename]
+        contents = inc_files[filename]['contents']
+
         # TODO(auggy): link to inc source code in repo, cgit or github
-        output['source_link'] = ''
+        source_file = inc_files[filename]['path']  # can we derive it from the path?
+        output['source_link'] = source_file
 
         # TODO(auggy): this should use docutils
         extracted_contents = extract_stuff(split_inc_file(contents))
@@ -84,8 +86,9 @@ def get_inc_files(path):
         print "Processing %(filename)s..." % {'filename': filename}
         f = open(filename, 'r')
 
-        # TODO(auggy): remove rest of path from filename
-        inc_files[filename] = f.read()
+        parts = filename.split('/')
+        shortened_filename = parts[-1]
+        inc_files[shortened_filename] = {'contents': f.read(), 'path': filename}
 
     return inc_files
 
