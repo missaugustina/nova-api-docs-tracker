@@ -4,6 +4,7 @@ import argparse
 import glob
 import os
 import re
+import sys
 
 from nova_api_docs_tracker.templates import templates
 
@@ -13,6 +14,12 @@ METHODS_LIST_RE = re.compile(r'rest_method:: ([A-Z]+.*$)', re.MULTILINE)
 def main():
     args = parse_args()
     path = args.path
+
+    # check path
+    if not os.path.exists(path):
+        print "Error: Path: {} does not exist!".format(path)
+        sys.exit(1)
+
     output = {}
 
     # get inc files
@@ -37,17 +44,13 @@ def main():
 
         # verify body
         rendered_body = body_template.render(output)
-
-        # TODO(auggy): print to local file
-        print rendered_body
-
+        print_local_file(contents=rendered_body, output_file='body_' + filename)
 
         # verify methods names
         output['methods_list'] = get_methods_list(extracted_contents['methods'])
         rendered_methods = method_template.render(output)
 
-        # TODO(auggy): print to local file
-        print rendered_methods
+        print_local_file(contents=rendered_methods, output_file='methods_' + filename)
 
         for method_name in extracted_contents['methods']:
             method_content = extracted_contents['methods'][method_name]
@@ -56,17 +59,15 @@ def main():
             output['method_name'] = method_name
             output['parameters_list'] = get_parameters_list(method_content)
             rendered_parameters = parameters_template.render(output)
-
-            # TODO(auggy): print to local file
-            print rendered_parameters
+            print_local_file(contents=rendered_parameters,
+                             output_file= '_'.join(method_name.split()) + '_parameters__' + filename)
 
             # verify examples
             rendered_examples = examples_template.render(output)
+            print_local_file(contents=rendered_examples,
+                             output_file='_'.join(method_name.split()) + '_examples__' + filename)
 
-            # TODO(auggy): print to local file
-            print rendered_examples
-
-        # TODO(auggy): post bugs to Launchpad using local files
+        # TODO(auggy): post bugs to Launchpad
         # TODO(auggy): keep track of bugs...?
 
         # TODO(auggy): option for retrieving and editing LP bugs...
@@ -121,6 +122,12 @@ def get_methods_list(contents):
 def get_parameters_list(contents):
     # TODO(auggy): if we decide this is helpful
     return []
+
+
+def print_local_file(contents, output_file):
+    print "Writing backup file: {}".format(output_file)
+    with open('../out/' + output_file, 'w') as f:
+        f.write(contents.encode("utf-8", "ignore"))
 
 # Allow for local debugging
 if __name__ == '__main__':
