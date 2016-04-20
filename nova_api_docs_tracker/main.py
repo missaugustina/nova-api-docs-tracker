@@ -20,7 +20,8 @@ def main():
         print "Error: Path: {} does not exist!".format(path)
         sys.exit(1)
 
-    output = {}
+    lp_out = dict()
+    output = dict()
 
     # get inc files
     inc_files = get_inc_files(path)
@@ -44,13 +45,12 @@ def main():
 
         # verify body
         rendered_body = body_template.render(output)
-        print_local_file(contents=rendered_body, output_file='body_' + filename)
+        lp_out[filename]['body'] = rendered_body
 
         # verify methods names
         output['methods_list'] = get_methods_list(extracted_contents['methods'])
         rendered_methods = method_template.render(output)
-
-        print_local_file(contents=rendered_methods, output_file='methods_' + filename)
+        lp_out[filename]['methods_list'] = rendered_methods
 
         for method_name in extracted_contents['methods']:
             method_content = extracted_contents['methods'][method_name]
@@ -59,18 +59,55 @@ def main():
             output['method_name'] = method_name
             output['parameters_list'] = get_parameters_list(method_content)
             rendered_parameters = parameters_template.render(output)
-            print_local_file(contents=rendered_parameters,
-                             output_file= '_'.join(method_name.split()) + '_parameters__' + filename)
+            lp_out[filename]['methods'][method_name]['parameters'] = rendered_parameters
 
             # verify examples
             rendered_examples = examples_template.render(output)
-            print_local_file(contents=rendered_examples,
-                             output_file='_'.join(method_name.split()) + '_examples__' + filename)
+            lp_out[filename]['methods'][method_name]['examples'] = rendered_examples
 
-        # TODO(auggy): post bugs to Launchpad
-        # TODO(auggy): keep track of bugs...?
+    # instantiate new Launchpad client
+    # lp_client = ...?
 
-        # TODO(auggy): option for retrieving and editing LP bugs...
+    bugs = dict()
+
+    for filename in lp_out:
+        # print body locally in case of LP error
+        print_local_file(
+            contents=lp_out[filename]['body'], output_file='body_' + filename)
+
+        # TODO(auggy): create a bug in LP to verify body content
+        # lp_client.post...?
+        bugs[filename]['body'] = '' # bug id
+
+        # print methods locally in case of LP error
+        print_local_file(contents=lp_out[filename]['methods_list'], output_file='methods_' + filename)
+
+        # TODO(auggy): create a bug in LP to verify methods list
+        # lp_client.post...?
+        bugs[filename]['methods_list'] = '' # bug id
+
+        for method_name in lp_out[filename]['methods']:
+            # print parameters locally in case of LP error
+            print_local_file(
+                contents=lp_out[filename]['methods'][method_name]['parameters'],
+                output_file=
+                '_'.join(method_name.split()) + '_parameters__' + filename)
+
+            # TODO(auggy): create a bug in LP to verify parameters
+            # lp_client.post...?
+            bugs[filename]['methods'][method_name]['parameters'] = '' # bug id
+
+            print_local_file(
+                contents=lp_out[filename]['methods'][method_name]['examples'],
+                output_file=
+                '_'.join(method_name.split()) + '_examples__' + filename)
+
+            # TODO(auggy): create a bug in LP to verify examples
+            # lp_client.post...?
+            bugs[filename]['methods'][method_name]['examples'] = '' # bug id
+
+    # TODO(auggy): keep track of bugs...?
+    # dump out bugs to local file
 
 def parse_args():
     parser = argparse.ArgumentParser("Post bugs to Launchpad for verifying API docs")
