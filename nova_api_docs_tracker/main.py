@@ -7,12 +7,18 @@ import re
 import sys
 
 from nova_api_docs_tracker.templates import templates
-from nova_api_docs_tracker.launchpad import launchpad
+import nova_api_docs_tracker.lpclient as lpclient
 
 SPLIT_FILE_RE = re.compile(r'\n([\w\s]+)\n\=+\n', re.MULTILINE)
 METHODS_LIST_RE = re.compile(r'rest_method:: ([A-Z]+.*$)', re.MULTILINE)
 
 def main():
+
+    lp = lpclient.LpClient()
+    test = lp.test_launchpad()
+    print "TEST %(test)s" % {'test': test}
+    exit()
+
     args = parse_args()
     path = args.path
 
