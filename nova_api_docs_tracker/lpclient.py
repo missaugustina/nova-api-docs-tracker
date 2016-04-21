@@ -9,7 +9,9 @@ class LpClient:
         self.credentials = Credentials("nova-api-docs-tracker")
         self.request_token_info = self.credentials.get_request_token(web_root="production")
 
-        self.lp = Launchpad(self.credentials, service_root="production")
+        self.lp = Launchpad.login_with('nova-api-docs-tracker', 'staging', version='devel')
+        # credentials_file ??
+        #self.lp = Launchpad(self.credentials, service_root="production")
 
         self.base_url = 'https://api.launchpad.net'
         self.version = '1.0'
